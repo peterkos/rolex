@@ -22,8 +22,7 @@ use tui::{
 
 fn main() -> Result<(), Box<dyn Error>> {
 
-
-
+    // Mostly copied from the blocks example
     enable_raw_mode()?;
     let mut stdout = io::stdout();
     execute!(stdout, EnterAlternateScreen, EnableMouseCapture)?;
@@ -45,9 +44,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         println!("{:?}", err);
     }
 
-
     Ok(())
-
 }
 
 
@@ -68,7 +65,6 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>) -> io::Result<()> {
 
 
 fn ui<B: Backend>(f: &mut Frame<B>) {
-
     let size = f.size();
 
     let block = Block::default().title("With borders").borders(Borders::ALL);
