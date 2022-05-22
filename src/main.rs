@@ -78,7 +78,7 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> io::Result<(
                     app.menu_next()
                 },
                 KeyCode::Enter => {
-                    app.menu_select();
+                    app.menu_select()
                 }
                 default => ()
             };

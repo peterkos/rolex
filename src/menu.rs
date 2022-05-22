@@ -52,14 +52,20 @@ pub struct Menu {
 impl<'a> Menu {
     // So we can pass this into `ui()` func w/o creating widget impl for now
     pub fn new() -> Self {
-        Menu {
+        let mut menu = Menu {
             menu_list: MenuList::new()
-        }
+        };
+
+        // Default select the first thing
+        menu.select_next();
+
+        menu
 
     }
 
-    pub fn make_list(&self) -> List<'a> {
+    // MARK: UI prep
 
+    pub fn make_list(&self) -> List<'a> {
         let items: Vec<ListItem> = self.menu_list.items.iter().map(|item| {
             let thing: String = item.to_string();
             let text = Text::from(thing);
@@ -67,6 +73,7 @@ impl<'a> Menu {
         }).collect();
 
         List::new(items)
+            .block(Block::default().title("Menu").borders(Borders::all()))
             .highlight_style(
                 Style::default()
                     .bg(Color::LightGreen)
@@ -74,6 +81,9 @@ impl<'a> Menu {
                 )
                 .highlight_symbol(">> ")
     }
+
+
+    // MARK: Selection methods
 
     pub fn select(&self) -> Option<MenuItem> {
         if let Some(i) = self.menu_list.state.selected() {
