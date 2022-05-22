@@ -18,6 +18,8 @@ use tui::{
 };
 
 
+mod menu;
+use menu::*;
 
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -65,8 +67,21 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>) -> io::Result<()> {
 
 
 fn ui<B: Backend>(f: &mut Frame<B>) {
-    let size = f.size();
 
+
+    let chunks = Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints([Constraint::Percentage(50), Constraint::Percentage(50)].as_ref())
+        .split(f.size());
+
+
+    // Menu on left half
+    let menu = Menu::new();
+    f.render_widget(menu, chunks[0]);
+
+    // Random block on right half for now
     let block = Block::default().title("With borders").borders(Borders::ALL);
-    f.render_widget(block, size);
+    f.render_widget(block, chunks[1]);
 }
+
+
