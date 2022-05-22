@@ -18,11 +18,17 @@ use tui::{
 };
 
 
+mod app;
+use app::*;
+
 mod menu;
 use menu::*;
 
 
 fn main() -> Result<(), Box<dyn Error>> {
+
+    // Instatiate our menus now
+
 
     // Mostly copied from the blocks example
     enable_raw_mode()?;
@@ -31,7 +37,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
 
-    let res = run_app(&mut terminal);
+    // Create our App instance
+    let app = App::new();
+    let res = run_app(&mut terminal, app);
 
     // Restore terminal
     disable_raw_mode()?;
@@ -51,22 +59,36 @@ fn main() -> Result<(), Box<dyn Error>> {
 
 
 // TODO: Factor out generic
-fn run_app<B: Backend>(terminal: &mut Terminal<B>) -> io::Result<()> {
+fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> io::Result<()> {
     loop {
-        terminal.draw(ui)?;
+        terminal.draw(|f| ui(f, &mut app))?;
 
         // Quit when press q
         if let Event::Key(key) = event::read()? {
             if let KeyCode::Char('q') = key.code {
                 return Ok(());
             }
+
+            match key.code {
+                KeyCode::Char('q') => return Ok(()),
+                KeyCode::Right | KeyCode::Down => {
+                    app.menu_prev()
+                },
+                KeyCode::Left | KeyCode::Up => {
+                    app.menu_next()
+                },
+                KeyCode::Enter => {
+                    app.menu_select();
+                }
+                default => ()
+            };
         }
     }
 }
 
 
 
-fn ui<B: Backend>(f: &mut Frame<B>) {
+fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
 
 
     let chunks = Layout::default()
@@ -76,8 +98,7 @@ fn ui<B: Backend>(f: &mut Frame<B>) {
 
 
     // Menu on left half
-    let menu = Menu::new();
-    f.render_widget(menu, chunks[0]);
+    f.render_stateful_widget(app.menu.make_list(), chunks[0], &mut app.menu.menu_list.state);
 
     // Random block on right half for now
     let block = Block::default().title("With borders").borders(Borders::ALL);
