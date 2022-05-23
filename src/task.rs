@@ -10,7 +10,7 @@ pub enum EventState {
     // TODO: Add more states; deferred?
 }
 
-pub struct TrackEvent<'a> {
+pub struct Task<'a> {
     pub start: Option<DateTime<Utc>>,
     pub end: Option<DateTime<Utc>>,
     pub name: &'a str,
@@ -19,11 +19,11 @@ pub struct TrackEvent<'a> {
     pub state: EventState,
 }
 
-impl<'a> TrackEvent<'a> {
+impl<'a> Task<'a> {
 
     fn new(name: &'a str, desc: Option<&'a str>) -> Self {
         // Note that events are inactive by default
-        TrackEvent {
+        Task {
             start: None,
             end: None,
             name,

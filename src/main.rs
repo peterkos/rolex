@@ -24,11 +24,11 @@ use viewmodel::*;
 mod menu;
 use menu::*;
 
-mod trackevent;
-use trackevent::*;
+mod task;
+use task::*;
 
-mod eventmanager;
-use eventmanager::*;
+mod taskmanager;
+use taskmanager::*;
 
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -74,16 +74,20 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut view_model: ViewModel) ->
                 return Ok(());
             }
 
+            // App state is manged by view model,
+            // so we leave it up to the view model
+            // to decide which view should receive
+            // the key commands.
             match key.code {
                 KeyCode::Char('q') => return Ok(()),
                 KeyCode::Right | KeyCode::Down => {
-                    view_model.menu_prev()
+                    view_model.list_operation(ManagedListState::Prev)
                 },
                 KeyCode::Left | KeyCode::Up => {
-                    view_model.menu_next()
+                    view_model.list_operation(ManagedListState::Next)
                 },
                 KeyCode::Enter => {
-                    view_model.menu_select()
+                    view_model.list_operation(ManagedListState::Select)
                 }
                 default => ()
             };
@@ -105,13 +109,17 @@ fn ui<B: Backend>(f: &mut Frame<B>, view_model: &mut ViewModel) {
     match view_model.state {
         AppState::Menu => {
             // Menu on left half
-            f.render_stateful_widget(view_model.menu.make_list(), chunks[0], &mut view_model.menu.menu_list.state);
+            f.render_stateful_widget(view_model.menu_manager.make_list(), chunks[0], &mut view_model.menu_manager.menu_list.state);
 
             // Random block on right half for now
             let block = Block::default().title("With borders").borders(Borders::ALL);
             f.render_widget(block, chunks[1]);
         },
         AppState::NewTask => {
+
+            // Task list on left half
+            f.render_stateful_widget(view_model.task_manager.make_list(), chunks[0], &mut view_model.task_manager.task_list.state);
+
             // Random block on right half for now
             let block = Block::default().title("With borders").borders(Borders::ALL);
             f.render_widget(block, chunks[1]);

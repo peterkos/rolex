@@ -5,21 +5,24 @@ use std::collections::HashMap;
 use chrono::prelude::*;
 use uuid::Uuid;
 
-use crate::{TrackEvent, EventState};
+use crate::{Task, EventState};
 
 
-
-struct EventManager<'a> {
-    events: HashMap<Uuid, TrackEvent<'a>>
+pub struct TaskManager<'a> {
+    events: HashMap<Uuid, Task<'a>>
 }
 
-impl<'a> EventManager<'a> {
+impl<'a> TaskManager<'a> {
 
-    fn add(&mut self, event: TrackEvent<'a>) {
+    pub fn new() -> Self {
+        TaskManager { events: HashMap::new() }
+    }
+
+    pub fn add(&mut self, event: Task<'a>) {
         self.events.insert(event.uuid, event);
     }
 
-    fn start(&mut self, uuid: Uuid) {
+    pub fn start(&mut self, uuid: Uuid) {
         // Grumble grumble, let...else is only in nightly :(
         if let Some(event) = self.events.get_mut(&uuid) {
             event.start = Some(Utc::now());
@@ -27,7 +30,7 @@ impl<'a> EventManager<'a> {
         }
     }
 
-    fn end(&mut self, uuid: Uuid) {
+    pub fn end(&mut self, uuid: Uuid) {
         if let Some(event) = self.events.get_mut(&uuid) {
             event.end = Some(Utc::now());
             event.state = EventState::Inactive;

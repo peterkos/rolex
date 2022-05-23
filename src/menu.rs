@@ -45,14 +45,14 @@ impl MenuList {
 }
 
 
-pub struct Menu {
+pub struct MenuManager {
     pub menu_list: MenuList
 }
 
-impl<'a> Menu {
+impl<'a> MenuManager {
     // So we can pass this into `ui()` func w/o creating widget impl for now
     pub fn new() -> Self {
-        let mut menu = Menu {
+        let mut menu = MenuManager {
             menu_list: MenuList::new()
         };
 
@@ -80,6 +80,16 @@ impl<'a> Menu {
                     .add_modifier(Modifier::BOLD)
                 )
                 .highlight_symbol(">> ")
+    }
+
+    // MARK: List operation
+
+    pub fn list_operation(&mut self, state: ManagedListState) {
+        match state {
+            ManagedListState::Prev   => self.select_prev(),
+            ManagedListState::Next   => self.select_next(),
+            ManagedListState::Select => self.select()
+        }
     }
 
 
