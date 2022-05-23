@@ -78,6 +78,13 @@ impl<'a> TaskManager<'a> {
         }
     }
 
+    // MARK: [View] Make New Task
+    pub fn make_newtask(&mut self) -> Block<'a> {
+        Block::default().title("New Task").borders(Borders::all())
+    }
+
+    // MARK: [View] Make List
+
     pub fn make_list(&self) -> List<'a> {
         let items: Vec<ListItem> = self.events.iter().map(|item| {
             let thing: String = item.1.to_string();

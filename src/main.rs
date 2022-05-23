@@ -111,12 +111,19 @@ fn ui<B: Backend>(f: &mut Frame<B>, view_model: &mut ViewModel) {
             // Menu on left half
             f.render_stateful_widget(view_model.menu_manager.make_list(), chunks[0], &mut view_model.menu_manager.menu_list.state);
 
-        // Random block on right half for now
+            // Random block on right half for now
             let block = Block::default().title("With borders").borders(Borders::ALL);
             f.render_widget(block, chunks[1]);
         },
         AppState::NewTask => {
+            // Task list on left half
+            f.render_widget(view_model.task_manager.make_newtask(), chunks[0]); // &mut view_model.task_manager.task_list.state);
 
+            // Random block on right half for now
+            let block = Block::default().title("With borders").borders(Borders::ALL);
+            f.render_widget(block, chunks[1]);
+        },
+        AppState::RecordTask => {
             // Task list on left half
             f.render_stateful_widget(view_model.task_manager.make_list(), chunks[0], &mut view_model.task_manager.task_list.state);
 
@@ -124,7 +131,6 @@ fn ui<B: Backend>(f: &mut Frame<B>, view_model: &mut ViewModel) {
             let block = Block::default().title("With borders").borders(Borders::ALL);
             f.render_widget(block, chunks[1]);
         },
-        AppState::RecordTask => todo!(),
         AppState::DeleteTask => todo!(),
     }
 
