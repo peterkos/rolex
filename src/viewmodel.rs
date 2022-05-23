@@ -38,7 +38,18 @@ impl<'a> ViewModel<'a> {
 
     pub fn list_operation(&mut self, state: ManagedListState) {
         match self.state {
-            AppState::Menu       => self.menu_manager.list_operation(state),
+            AppState::Menu       => {
+                let selected = self.menu_manager.list_operation(state);
+
+                if let Some(selected) = selected {
+                    match selected {
+                        MenuItem::RecordTask => self.state = AppState::RecordTask,
+                        MenuItem::NewTask    => self.state = AppState::NewTask,
+                        MenuItem::DeleteTask => self.state = AppState::DeleteTask,
+                    }
+                }
+
+            },
             AppState::NewTask    => todo!(),
             AppState::RecordTask => todo!(),
             AppState::DeleteTask => todo!(),
@@ -70,6 +81,6 @@ impl<'a> ViewModel<'a> {
     }
 
     // MARK: Task List interface
-    pub fn
+    // pub fn
 
 }

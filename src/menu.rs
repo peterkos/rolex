@@ -21,6 +21,8 @@ use std::string::ToString;
 use strum_macros::{Display, EnumIter};
 use strum::IntoEnumIterator;
 
+use crate::viewmodel::*;
+
 
 #[derive(Display, EnumIter)]
 pub enum MenuItem {
@@ -84,10 +86,10 @@ impl<'a> MenuManager {
 
     // MARK: List operation
 
-    pub fn list_operation(&mut self, state: ManagedListState) {
+    pub fn list_operation(&mut self, state: ManagedListState) -> Option<MenuItem> {
         match state {
-            ManagedListState::Prev   => self.select_prev(),
-            ManagedListState::Next   => self.select_next(),
+            ManagedListState::Prev   => { self.select_prev(); None },
+            ManagedListState::Next   => { self.select_next(); None },
             ManagedListState::Select => self.select()
         }
     }

@@ -3,6 +3,7 @@
 use chrono::prelude::*;
 use uuid::Uuid;
 
+use std::fmt::Display;
 
 pub enum EventState {
     Active,
@@ -31,6 +32,12 @@ impl<'a> Task<'a> {
             uuid: Uuid::new_v4(),
             state: EventState::Inactive
         }
+    }
+}
+
+impl<'a> Display for Task<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "name: {:?}, desc: {:?}", self.name, self.desc)
     }
 }
 

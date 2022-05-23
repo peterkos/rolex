@@ -111,7 +111,7 @@ fn ui<B: Backend>(f: &mut Frame<B>, view_model: &mut ViewModel) {
             // Menu on left half
             f.render_stateful_widget(view_model.menu_manager.make_list(), chunks[0], &mut view_model.menu_manager.menu_list.state);
 
-            // Random block on right half for now
+        // Random block on right half for now
             let block = Block::default().title("With borders").borders(Borders::ALL);
             f.render_widget(block, chunks[1]);
         },
