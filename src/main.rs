@@ -18,8 +18,8 @@ use tui::{
 };
 
 
-mod app;
-use app::*;
+mod viewmodel;
+use viewmodel::*;
 
 mod menu;
 use menu::*;
@@ -43,8 +43,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
 
-    // Create our App instance
-    let app = App::new();
+    let app = ViewModel::new();
     let res = run_app(&mut terminal, app);
 
     // Restore terminal
@@ -65,9 +64,9 @@ fn main() -> Result<(), Box<dyn Error>> {
 
 
 // TODO: Factor out generic
-fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> io::Result<()> {
+fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut view_model: ViewModel) -> io::Result<()> {
     loop {
-        terminal.draw(|f| ui(f, &mut app))?;
+        terminal.draw(|f| ui(f, &mut view_model))?;
 
         // Quit when press q
         if let Event::Key(key) = event::read()? {
@@ -78,13 +77,13 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> io::Result<(
             match key.code {
                 KeyCode::Char('q') => return Ok(()),
                 KeyCode::Right | KeyCode::Down => {
-                    app.menu_prev()
+                    view_model.menu_prev()
                 },
                 KeyCode::Left | KeyCode::Up => {
-                    app.menu_next()
+                    view_model.menu_next()
                 },
                 KeyCode::Enter => {
-                    app.menu_select()
+                    view_model.menu_select()
                 }
                 default => ()
             };
@@ -94,21 +93,34 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut app: App) -> io::Result<(
 
 
 
-fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
-
+fn ui<B: Backend>(f: &mut Frame<B>, view_model: &mut ViewModel) {
 
     let chunks = Layout::default()
         .direction(Direction::Horizontal)
         .constraints([Constraint::Percentage(50), Constraint::Percentage(50)].as_ref())
         .split(f.size());
 
+    // I really don't like this pattern,
+    // but it might be the only option for this UI style.
+    match view_model.state {
+        AppState::Menu => {
+            // Menu on left half
+            f.render_stateful_widget(view_model.menu.make_list(), chunks[0], &mut view_model.menu.menu_list.state);
 
-    // Menu on left half
-    f.render_stateful_widget(app.menu.make_list(), chunks[0], &mut app.menu.menu_list.state);
+            // Random block on right half for now
+            let block = Block::default().title("With borders").borders(Borders::ALL);
+            f.render_widget(block, chunks[1]);
+        },
+        AppState::NewTask => {
+            // Random block on right half for now
+            let block = Block::default().title("With borders").borders(Borders::ALL);
+            f.render_widget(block, chunks[1]);
+        },
+        AppState::RecordTask => todo!(),
+        AppState::DeleteTask => todo!(),
+    }
 
-    // Random block on right half for now
-    let block = Block::default().title("With borders").borders(Borders::ALL);
-    f.render_widget(block, chunks[1]);
+
 }
 
 

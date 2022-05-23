@@ -4,24 +4,29 @@ use tui::widgets::ListState;
 use crate::menu::*;
 
 
-enum AppState {
-    // TODO: fill in with Menu, etc. for processing events
-    // and creating a focus system
+/// All the possible views that can be rendered on screen
+/// (i.e., all different views we need to make & switch between...)
+pub enum AppState {
+    Menu,
+    NewTask,
+    RecordTask,
+    DeleteTask
 }
 
 /// Store the current state of the running appplicarion
-pub struct App {
-    pub menu: Menu
+pub struct ViewModel {
+    pub menu: Menu,
+    pub state: AppState
 }
 
 
-impl App {
+impl ViewModel {
     pub fn new() -> Self {
-        App {
-            menu: Menu::new()
+        ViewModel {
+            menu: Menu::new(),
+            state: AppState::Menu
         }
     }
-
 
     // MARK: Menu interface
     // This will need a refactor once states are implemented.
@@ -36,9 +41,11 @@ impl App {
     pub fn menu_select(&self) {
         if let Some(menu_item) = self.menu.select() {
             match menu_item {
-                MenuItem::RecordTask => println!("RecordTask selected"),
-                MenuItem::NewTask    => println!("NewTask selected"),
-                MenuItem::DeleteTask => println!("DeleteTask selected"),
+                MenuItem::RecordTask => (),
+                MenuItem::NewTask    => {
+
+                },
+                MenuItem::DeleteTask => (),
             }
         }
     }
