@@ -78,7 +78,7 @@ impl<'a> MenuManager {
             .block(Block::default().title("Menu").borders(Borders::all()))
             .highlight_style(
                 Style::default()
-                    .bg(Color::LightGreen)
+                    .fg(Color::LightBlue)
                     .add_modifier(Modifier::BOLD)
                 )
                 .highlight_symbol(">> ")

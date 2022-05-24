@@ -13,7 +13,7 @@ use tui::{
     layout::{Alignment, Constraint, Direction, Layout},
     style::{Color, Modifier, Style},
     text::Span,
-    widgets::{Block, BorderType, Borders},
+    widgets::{Block, BorderType, Borders, Paragraph},
     Frame, Terminal,
 };
 
@@ -68,6 +68,9 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut view_model: ViewModel) ->
     loop {
         terminal.draw(|f| ui(f, &mut view_model))?;
 
+        // TODO: Add menu global keybind except when typing??
+        // Aaargh.
+
         // Quit when press q
         if let Event::Key(key) = event::read()? {
             if let KeyCode::Char('q') = key.code {
@@ -99,37 +102,70 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut view_model: ViewModel) ->
 
 fn ui<B: Backend>(f: &mut Frame<B>, view_model: &mut ViewModel) {
 
-    let chunks = Layout::default()
+
+    /*
+        |-------|
+        |-------|   wrapper[0]
+
+        |---|---|
+        |   |   |   wrapper[1]
+        |---|---|
+          ^   ^---- main[1]
+          |-------- main[0]
+
+        |-------|   wrapper[2]
+        |-------|
+
+    */
+
+    // Create main wrapper around views
+    let wrapper = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([Constraint::Percentage(10), Constraint::Percentage(80), Constraint::Percentage(10)].as_ref())
+        .vertical_margin(6)
+        .horizontal_margin(30)
+        .split(f.size());
+
+    // Inner layout used for main split panes
+    let main = Layout::default()
         .direction(Direction::Horizontal)
         .constraints([Constraint::Percentage(50), Constraint::Percentage(50)].as_ref())
-        .split(f.size());
+        .split(wrapper[1]);
+
+
+    // Draw menu help text
+    let text = "Press q to quit, m for menu";
+    let paragraph = Paragraph::new(text.clone())
+        .block(Block::default())
+        .alignment(Alignment::Center);
+    f.render_widget(paragraph, wrapper[2]);
 
     // I really don't like this pattern,
     // but it might be the only option for this UI style.
     match view_model.state {
         AppState::Menu => {
             // Menu on left half
-            f.render_stateful_widget(view_model.menu_manager.make_list(), chunks[0], &mut view_model.menu_manager.menu_list.state);
+            f.render_stateful_widget(view_model.menu_manager.make_list(), main[0], &mut view_model.menu_manager.menu_list.state);
 
             // Random block on right half for now
             let block = Block::default().title("With borders").borders(Borders::ALL);
-            f.render_widget(block, chunks[1]);
+            f.render_widget(block, main[1]);
         },
         AppState::NewTask => {
             // Task list on left half
-            f.render_widget(view_model.task_manager.make_newtask(), chunks[0]); // &mut view_model.task_manager.task_list.state);
+            f.render_widget(view_model.task_manager.make_newtask(), main[0]); // &mut view_model.task_manager.task_list.state);
 
             // Random block on right half for now
             let block = Block::default().title("With borders").borders(Borders::ALL);
-            f.render_widget(block, chunks[1]);
+            f.render_widget(block, main[1]);
         },
         AppState::RecordTask => {
             // Task list on left half
-            f.render_stateful_widget(view_model.task_manager.make_list(), chunks[0], &mut view_model.task_manager.task_list.state);
+            f.render_stateful_widget(view_model.task_manager.make_list(), main[0], &mut view_model.task_manager.task_list.state);
 
             // Random block on right half for now
             let block = Block::default().title("With borders").borders(Borders::ALL);
-            f.render_widget(block, chunks[1]);
+            f.render_widget(block, main[1]);
         },
         AppState::DeleteTask => todo!(),
     }
