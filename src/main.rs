@@ -68,13 +68,23 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut view_model: ViewModel) ->
     loop {
         terminal.draw(|f| ui(f, &mut view_model))?;
 
-        // TODO: Add menu global keybind except when typing??
+        // TODO: Add menu global keybind exception for typing??
         // Aaargh.
 
-        // Quit when press q
+        if view_model.state == AppState::Typing {
+            continue
+        }
+
         if let Event::Key(key) = event::read()? {
+
+            // Global: quit on `q`
             if let KeyCode::Char('q') = key.code {
                 return Ok(());
+            }
+
+            // Global: show menu on `m`
+            if let KeyCode::Char('m') = key.code {
+                view_model.state = AppState::Menu;
             }
 
             // App state is manged by view model,
@@ -97,7 +107,6 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut view_model: ViewModel) ->
         }
     }
 }
-
 
 
 fn ui<B: Backend>(f: &mut Frame<B>, view_model: &mut ViewModel) {
@@ -168,6 +177,7 @@ fn ui<B: Backend>(f: &mut Frame<B>, view_model: &mut ViewModel) {
             f.render_widget(block, main[1]);
         },
         AppState::DeleteTask => todo!(),
+        AppState::Typing => todo!()
     }
 
 

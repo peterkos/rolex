@@ -6,11 +6,13 @@ use crate::*;
 
 /// All the possible views that can be rendered on screen
 /// (i.e., all different views we need to make & switch between...)
+#[derive(PartialEq, Eq)]
 pub enum AppState {
     Menu,
     NewTask,
     RecordTask,
-    DeleteTask
+    DeleteTask,
+    Typing // Special state for the event handler to ignore input
 }
 
 pub enum ManagedListState {
@@ -53,6 +55,7 @@ impl<'a> ViewModel<'a> {
             AppState::NewTask    => todo!(),
             AppState::RecordTask => todo!(),
             AppState::DeleteTask => todo!(),
+            AppState::Typing     => todo!()
         }
 
     }
