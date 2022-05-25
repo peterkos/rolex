@@ -84,13 +84,21 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut view_model: ViewModel) ->
 
                 // Special code to quit typing is Esc
                 if let KeyCode::Esc = key.code {
-                    view_model.cancel_input();
+                    view_model.input_manager.cancel_input();
                 }
 
                 // Otherwise, we want to forward our keypress into the InputManager
                 if let KeyCode::Char(chr) = key.code {
                     view_model.input_manager.keypress(chr);
                 }
+
+                // Manual deletion...
+                if let KeyCode::Backspace = key.code {
+                    view_model.input_manager.backspace();
+                }
+
+                // TODO: Implement arrow movement
+                // TODO: Implement option+left/right for per-word traversal
 
                 continue
             }

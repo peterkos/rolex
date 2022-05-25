@@ -23,6 +23,10 @@ impl<'a> InputManager<'a> {
         self.input_text.push(key);
     }
 
+    pub fn backspace(&mut self) {
+        self.input_text.pop();
+    }
+
     pub fn cancel_input(&mut self) {
         self.input_text.clear();
         self.cursor = "";

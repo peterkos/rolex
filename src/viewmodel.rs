@@ -62,13 +62,6 @@ impl<'a> ViewModel<'a> {
 
     }
 
-    // MARK: Input handling
-
-    pub fn cancel_input(&mut self) {
-
-        self.input_manager.cancel_input();
-    }
-
     // MARK: Menu interface
 
     // This will need a refactor once states are implemented.
