@@ -59,7 +59,13 @@ impl<'a> ViewModel<'a> {
             AppState::DeleteTask => todo!(),
             AppState::Typing     => todo!()
         }
+    }
 
+    // MARK: Input Handling
+
+    pub fn cancel_input(&mut self) {
+        self.input_manager.cancel_input();
+        self.state = AppState::Menu;
     }
 
     // MARK: Menu interface

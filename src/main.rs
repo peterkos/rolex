@@ -84,7 +84,7 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut view_model: ViewModel) ->
 
                 // Special code to quit typing is Esc
                 if let KeyCode::Esc = key.code {
-                    view_model.input_manager.cancel_input();
+                    view_model.cancel_input();
                 }
 
                 // Otherwise, we want to forward our keypress into the InputManager
@@ -167,18 +167,6 @@ fn ui<B: Backend>(f: &mut Frame<B>, view_model: &mut ViewModel) {
         .constraints([Constraint::Percentage(50), Constraint::Percentage(50)].as_ref())
         .split(wrapper[1]);
 
-    let newtask_layout = Layout::default()
-        .direction(Direction::Vertical)
-        .constraints([Constraint::Percentage(80), Constraint::Percentage(2)].as_ref())
-        .split(main[0]);
-
-    // Draw menu help text
-    let text = "Press q to quit, m for menu";
-    let paragraph = Paragraph::new(text.clone())
-        .block(Block::default())
-        .alignment(Alignment::Center);
-    f.render_widget(paragraph, wrapper[2]);
-
     // I really don't like this pattern,
     // but it might be the only option for this UI style.
     match view_model.state {
@@ -194,7 +182,7 @@ fn ui<B: Backend>(f: &mut Frame<B>, view_model: &mut ViewModel) {
             // Task list on left half
             // f.render_stateful_widget(view_model.task_manager.make_newtask(), main[0], &mut view_model.task_manager.task_list.state);
 
-            f.render_widget(view_model.input_manager.make_input(), newtask_layout[0]);
+            f.render_widget(view_model.input_manager.make_input(), main[0]);
 
             // Now that NewTask has loaded,
             // we want the user to automatically start typing.
@@ -215,6 +203,19 @@ fn ui<B: Backend>(f: &mut Frame<B>, view_model: &mut ViewModel) {
         AppState::DeleteTask => todo!(),
         // AppState::Typing => () // FIXME: Ignore typing state for now
     }
+
+    // Draw menu help text
+    // This needs to be done **after** the views are rendered
+    // because the rendering of some views triggers modes to be activated in that view
+    // (i.e., Typing).
+    let text = match view_model.state {
+        AppState::Typing => "Press Esc to quit",
+        _                => "Press q to quit, m for menu"
+    };
+    let paragraph = Paragraph::new(text.clone())
+        .block(Block::default())
+        .alignment(Alignment::Center);
+    f.render_widget(paragraph, wrapper[2]);
 
 
 }
