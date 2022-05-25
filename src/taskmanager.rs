@@ -56,10 +56,10 @@ impl<'a> TaskManager<'a> {
 
         // FIXME: Remove dummy data here
         let mut tasks = HashMap::new();
-        let a = Task::new("Hello", None);
-        tasks.insert(a.uuid, a);
-        let b = Task::new("World", None);
-        tasks.insert(b.uuid, b);
+        // let a = Task::new("Hello", None);
+        // tasks.insert(a.uuid, a);
+        // let b = Task::new("World", None);
+        // tasks.insert(b.uuid, b);
 
 
         TaskManager {
@@ -68,7 +68,12 @@ impl<'a> TaskManager<'a> {
         }
     }
 
-    pub fn add(&mut self, event: Task<'a>) {
+    pub fn create_task(&mut self, name: String, desc: Option<&'a str>) {
+        let task = Task::new(name, desc);
+        self.tasks.insert(task.uuid, task);
+    }
+
+    fn add(&mut self, event: Task<'a>) {
         self.tasks.insert(event.uuid, event);
     }
 

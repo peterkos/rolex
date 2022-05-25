@@ -14,7 +14,7 @@ pub enum TaskState {
 pub struct Task<'a> {
     pub start: Option<DateTime<Utc>>,
     pub end: Option<DateTime<Utc>>,
-    pub name: &'a str,
+    pub name: String,
     pub desc: Option<&'a str>,
     pub uuid: Uuid,
     pub state: TaskState,
@@ -22,12 +22,12 @@ pub struct Task<'a> {
 
 impl<'a> Task<'a> {
 
-    pub fn new(name: &'a str, desc: Option<&'a str>) -> Self {
+    pub fn new(name: String, desc: Option<&'a str>) -> Self {
         // Note that events are inactive by default
         Task {
             start: None,
             end: None,
-            name,
+            name: name.clone(),
             desc,
             uuid: Uuid::new_v4(),
             state: TaskState::Inactive

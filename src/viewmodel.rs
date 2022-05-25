@@ -63,6 +63,12 @@ impl<'a> ViewModel<'a> {
 
     // MARK: Input Handling
 
+    pub fn create_task(&mut self) {
+        // FIXME: Impl desc input for input stuff
+        let name = self.input_manager.input_text.clone();
+        self.task_manager.create_task(name.clone(), None);
+    }
+
     pub fn cancel_input(&mut self) {
         self.input_manager.cancel_input();
         self.state = AppState::Menu;

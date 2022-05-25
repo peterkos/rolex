@@ -7,7 +7,7 @@ use crossterm::{
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
-use std::{error::Error, io, os::unix::net};
+use std::{error::Error, io, os::unix::net, rc::Rc, borrow::BorrowMut, cell::RefCell};
 use tui::{
     backend::{Backend, CrosstermBackend},
     layout::{Alignment, Constraint, Direction, Layout},
@@ -46,8 +46,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
 
-    let app = ViewModel::new();
-    let res = run_app(&mut terminal, app);
+    let view_model = Rc::new(RefCell::new(ViewModel::new()));
+    let res = run_app(&mut terminal, view_model);
 
     // Restore terminal
     disable_raw_mode()?;
@@ -67,9 +67,9 @@ fn main() -> Result<(), Box<dyn Error>> {
 
 
 // TODO: Factor out generic
-fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut view_model: ViewModel) -> io::Result<()> {
+fn run_app<B: Backend>(terminal: &mut Terminal<B>, view_model: Rc<RefCell<ViewModel>>) -> io::Result<()> {
     loop {
-        terminal.draw(|f| ui(f, &mut view_model))?;
+        terminal.draw(|f| ui(f, Rc::clone(&view_model)))?;
 
 
         if let Event::Key(key) = event::read()? {
@@ -80,21 +80,26 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut view_model: ViewModel) ->
                 return Ok(())
             }
 
-            if view_model.state == AppState::Typing {
+            if view_model.borrow().state == AppState::Typing {
 
                 // Special code to quit typing is Esc
                 if let KeyCode::Esc = key.code {
-                    view_model.cancel_input();
+                    RefCell::borrow_mut(&view_model).cancel_input();
+                }
+
+                // If Enter is pressed we want to treat that as good input
+                if let KeyCode::Enter = key.code {
+                    RefCell::borrow_mut(&view_model).create_task();
                 }
 
                 // Otherwise, we want to forward our keypress into the InputManager
                 if let KeyCode::Char(chr) = key.code {
-                    view_model.input_manager.keypress(chr);
+                    RefCell::borrow_mut(&view_model).input_manager.keypress(chr);
                 }
 
                 // Manual deletion...
                 if let KeyCode::Backspace = key.code {
-                    view_model.input_manager.backspace();
+                    RefCell::borrow_mut(&view_model).input_manager.backspace();
                 }
 
                 // TODO: Implement arrow movement
@@ -110,7 +115,7 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut view_model: ViewModel) ->
 
             // Global: show menu on `m`
             if let KeyCode::Char('m') = key.code {
-                view_model.state = AppState::Menu;
+                RefCell::borrow_mut(&view_model).state = AppState::Menu;
             }
 
             // App state is manged by view model,
@@ -120,13 +125,13 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut view_model: ViewModel) ->
             match key.code {
                 KeyCode::Char('q') => return Ok(()),
                 KeyCode::Right | KeyCode::Down => {
-                    view_model.list_operation(ManagedListState::Prev)
+                    RefCell::borrow_mut(&view_model).list_operation(ManagedListState::Prev)
                 },
                 KeyCode::Left | KeyCode::Up => {
-                    view_model.list_operation(ManagedListState::Next)
+                    RefCell::borrow_mut(&view_model).list_operation(ManagedListState::Next)
                 },
                 KeyCode::Enter => {
-                    view_model.list_operation(ManagedListState::Select)
+                    RefCell::borrow_mut(&view_model).list_operation(ManagedListState::Select)
                 }
                 default => ()
             };
@@ -135,7 +140,7 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut view_model: ViewModel) ->
 }
 
 
-fn ui<B: Backend>(f: &mut Frame<B>, view_model: &mut ViewModel) {
+fn ui<B: Backend>(f: &mut Frame<B>, view_model_ref: Rc<RefCell<ViewModel>>) {
 
 
     /*
@@ -169,6 +174,10 @@ fn ui<B: Backend>(f: &mut Frame<B>, view_model: &mut ViewModel) {
 
     // I really don't like this pattern,
     // but it might be the only option for this UI style.
+
+    let mut view_model = RefCell::borrow_mut(&view_model_ref);
+
+
     match view_model.state {
         AppState::Menu => {
             // Menu on left half
