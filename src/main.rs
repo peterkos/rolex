@@ -81,15 +81,18 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut view_model: ViewModel) ->
             }
 
             if view_model.state == AppState::Typing {
-                continue
-            }
-
-            if view_model.state == AppState::Typing {
 
                 // Special code to quit typing is Esc
                 if let KeyCode::Esc = key.code {
                     view_model.cancel_input();
                 }
+
+                // Otherwise, we want to forward our keypress into the InputManager
+                if let KeyCode::Char(chr) = key.code {
+                    view_model.input_manager.keypress(chr);
+                }
+
+                continue
             }
 
             // Global: quit on `q`
@@ -179,7 +182,7 @@ fn ui<B: Backend>(f: &mut Frame<B>, view_model: &mut ViewModel) {
             let block = Block::default().title("With borders").borders(Borders::ALL);
             f.render_widget(block, main[1]);
         },
-        AppState::NewTask => {
+        AppState::NewTask | AppState::Typing => {
             // Task list on left half
             // f.render_stateful_widget(view_model.task_manager.make_newtask(), main[0], &mut view_model.task_manager.task_list.state);
 
@@ -202,7 +205,7 @@ fn ui<B: Backend>(f: &mut Frame<B>, view_model: &mut ViewModel) {
             f.render_widget(block, main[1]);
         },
         AppState::DeleteTask => todo!(),
-        AppState::Typing => () // FIXME: Ignore typing state for now
+        // AppState::Typing => () // FIXME: Ignore typing state for now
     }
 
 

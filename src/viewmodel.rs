@@ -6,7 +6,7 @@ use crate::*;
 
 /// All the possible views that can be rendered on screen
 /// (i.e., all different views we need to make & switch between...)
-#[derive(PartialEq, Eq)]
+#[derive(PartialEq, Eq, Debug)]
 pub enum AppState {
     Menu,
     NewTask,
