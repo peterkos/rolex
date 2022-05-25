@@ -28,7 +28,7 @@ use strum::IntoEnumIterator;
 
 
 
-use crate::{Task, EventState};
+use crate::{Task, TaskState};
 
 
 pub struct TaskList {
@@ -46,35 +46,44 @@ impl TaskList {
 }
 
 pub struct TaskManager<'a> {
-    events: HashMap<Uuid, Task<'a>>,
+    tasks: HashMap<Uuid, Task<'a>>,
     pub task_list: TaskList
 }
 
 impl<'a> TaskManager<'a> {
 
     pub fn new() -> Self {
+
+        // FIXME: Remove dummy data here
+        let mut tasks = HashMap::new();
+        let a = Task::new("Hello", None);
+        tasks.insert(a.uuid, a);
+        let b = Task::new("World", None);
+        tasks.insert(b.uuid, b);
+
+
         TaskManager {
-            events: HashMap::new(),
+            tasks,
             task_list: TaskList::new()
         }
     }
 
     pub fn add(&mut self, event: Task<'a>) {
-        self.events.insert(event.uuid, event);
+        self.tasks.insert(event.uuid, event);
     }
 
     pub fn start(&mut self, uuid: Uuid) {
         // Grumble grumble, let...else is only in nightly :(
-        if let Some(event) = self.events.get_mut(&uuid) {
+        if let Some(event) = self.tasks.get_mut(&uuid) {
             event.start = Some(Utc::now());
-            event.state = EventState::Active;
+            event.state = TaskState::Active;
         }
     }
 
     pub fn end(&mut self, uuid: Uuid) {
-        if let Some(event) = self.events.get_mut(&uuid) {
+        if let Some(event) = self.tasks.get_mut(&uuid) {
             event.end = Some(Utc::now());
-            event.state = EventState::Inactive;
+            event.state = TaskState::Inactive;
         }
     }
 
@@ -86,7 +95,7 @@ impl<'a> TaskManager<'a> {
     // MARK: [View] Make List
 
     pub fn make_list(&self) -> List<'a> {
-        let items: Vec<ListItem> = self.events.iter().map(|item| {
+        let items: Vec<ListItem> = self.tasks.iter().map(|item| {
             let thing: String = item.1.to_string();
             let text = Text::from(thing);
             ListItem::new(text)

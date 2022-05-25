@@ -5,7 +5,7 @@ use uuid::Uuid;
 
 use std::fmt::Display;
 
-pub enum EventState {
+pub enum TaskState {
     Active,
     Inactive
     // TODO: Add more states; deferred?
@@ -17,12 +17,12 @@ pub struct Task<'a> {
     pub name: &'a str,
     pub desc: Option<&'a str>,
     pub uuid: Uuid,
-    pub state: EventState,
+    pub state: TaskState,
 }
 
 impl<'a> Task<'a> {
 
-    fn new(name: &'a str, desc: Option<&'a str>) -> Self {
+    pub fn new(name: &'a str, desc: Option<&'a str>) -> Self {
         // Note that events are inactive by default
         Task {
             start: None,
@@ -30,7 +30,7 @@ impl<'a> Task<'a> {
             name,
             desc,
             uuid: Uuid::new_v4(),
-            state: EventState::Inactive
+            state: TaskState::Inactive
         }
     }
 }

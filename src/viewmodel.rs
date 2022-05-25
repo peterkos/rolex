@@ -25,6 +25,7 @@ pub enum ManagedListState {
 pub struct ViewModel<'a> {
     pub menu_manager: MenuManager,
     pub task_manager: TaskManager<'a>,
+    pub input_manager: InputManager<'a>,
     pub state: AppState,
 }
 
@@ -34,6 +35,7 @@ impl<'a> ViewModel<'a> {
         ViewModel {
             menu_manager: MenuManager::new(),
             task_manager: TaskManager::new(),
+            input_manager: InputManager::new(),
             state: AppState::Menu,
         }
     }
@@ -58,6 +60,13 @@ impl<'a> ViewModel<'a> {
             AppState::Typing     => todo!()
         }
 
+    }
+
+    // MARK: Input handling
+
+    pub fn cancel_input(&mut self) {
+
+        self.input_manager.cancel_input();
     }
 
     // MARK: Menu interface

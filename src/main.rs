@@ -3,11 +3,11 @@
 
 
 use crossterm::{
-    event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
+    event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode, KeyModifiers},
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
-use std::{error::Error, io};
+use std::{error::Error, io, os::unix::net};
 use tui::{
     backend::{Backend, CrosstermBackend},
     layout::{Alignment, Constraint, Direction, Layout},
@@ -29,6 +29,9 @@ use task::*;
 
 mod taskmanager;
 use taskmanager::*;
+
+mod inputmanager;
+use inputmanager::*;
 
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -68,14 +71,26 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, mut view_model: ViewModel) ->
     loop {
         terminal.draw(|f| ui(f, &mut view_model))?;
 
-        // TODO: Add menu global keybind exception for typing??
-        // Aaargh.
-
-        if view_model.state == AppState::Typing {
-            continue
-        }
 
         if let Event::Key(key) = event::read()? {
+
+            // I believe the technical term here is "oof"
+            // Manually quit using Ctrl+c
+            if key.modifiers == KeyModifiers::CONTROL && key.code == KeyCode::Char('c') {
+                return Ok(())
+            }
+
+            if view_model.state == AppState::Typing {
+                continue
+            }
+
+            if view_model.state == AppState::Typing {
+
+                // Special code to quit typing is Esc
+                if let KeyCode::Esc = key.code {
+                    view_model.cancel_input();
+                }
+            }
 
             // Global: quit on `q`
             if let KeyCode::Char('q') = key.code {
@@ -141,6 +156,10 @@ fn ui<B: Backend>(f: &mut Frame<B>, view_model: &mut ViewModel) {
         .constraints([Constraint::Percentage(50), Constraint::Percentage(50)].as_ref())
         .split(wrapper[1]);
 
+    let newtask_layout = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([Constraint::Percentage(80), Constraint::Percentage(2)].as_ref())
+        .split(main[0]);
 
     // Draw menu help text
     let text = "Press q to quit, m for menu";
@@ -162,7 +181,13 @@ fn ui<B: Backend>(f: &mut Frame<B>, view_model: &mut ViewModel) {
         },
         AppState::NewTask => {
             // Task list on left half
-            f.render_widget(view_model.task_manager.make_newtask(), main[0]); // &mut view_model.task_manager.task_list.state);
+            // f.render_stateful_widget(view_model.task_manager.make_newtask(), main[0], &mut view_model.task_manager.task_list.state);
+
+            f.render_widget(view_model.input_manager.make_input(), newtask_layout[0]);
+
+            // Now that NewTask has loaded,
+            // we want the user to automatically start typing.
+            view_model.state = AppState::Typing;
 
             // Random block on right half for now
             let block = Block::default().title("With borders").borders(Borders::ALL);
@@ -177,7 +202,7 @@ fn ui<B: Backend>(f: &mut Frame<B>, view_model: &mut ViewModel) {
             f.render_widget(block, main[1]);
         },
         AppState::DeleteTask => todo!(),
-        AppState::Typing => todo!()
+        AppState::Typing => () // FIXME: Ignore typing state for now
     }
 
 
