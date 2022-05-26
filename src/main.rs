@@ -177,15 +177,14 @@ fn ui<B: Backend>(f: &mut Frame<B>, view_model_ref: Rc<RefCell<ViewModel>>) {
 
     let mut view_model = RefCell::borrow_mut(&view_model_ref);
 
+    // FIXME: For now, always put task list on right half
+    f.render_stateful_widget(view_model.task_manager.make_list(), main[1], &mut view_model.task_manager.task_list.state);
 
     match view_model.state {
         AppState::Menu => {
             // Menu on left half
             f.render_stateful_widget(view_model.menu_manager.make_list(), main[0], &mut view_model.menu_manager.menu_list.state);
 
-            // Random block on right half for now
-            let block = Block::default().title("With borders").borders(Borders::ALL);
-            f.render_widget(block, main[1]);
         },
         AppState::NewTask | AppState::Typing => {
             // Task list on left half
@@ -196,18 +195,10 @@ fn ui<B: Backend>(f: &mut Frame<B>, view_model_ref: Rc<RefCell<ViewModel>>) {
             // Now that NewTask has loaded,
             // we want the user to automatically start typing.
             view_model.state = AppState::Typing;
-
-            // Random block on right half for now
-            let block = Block::default().title("With borders").borders(Borders::ALL);
-            f.render_widget(block, main[1]);
         },
         AppState::RecordTask => {
             // Task list on left half
             f.render_stateful_widget(view_model.task_manager.make_list(), main[0], &mut view_model.task_manager.task_list.state);
-
-            // Random block on right half for now
-            let block = Block::default().title("With borders").borders(Borders::ALL);
-            f.render_widget(block, main[1]);
         },
         AppState::DeleteTask => todo!(),
         // AppState::Typing => () // FIXME: Ignore typing state for now

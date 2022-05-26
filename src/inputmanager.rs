@@ -14,7 +14,7 @@ impl<'a> InputManager<'a> {
 
     pub fn new() -> Self {
         InputManager {
-            input_text: String::from("input: "),
+            input_text: String::from(""),
             cursor: "_"
         }
     }
@@ -27,12 +27,12 @@ impl<'a> InputManager<'a> {
         self.input_text.pop();
     }
 
-    pub fn cancel_input(&mut self) {
-        self.input_text = String::from("input: ");
+    pub fn clear_input(&mut self) {
+        self.input_text.clear();
     }
 
     pub fn make_input(&mut self) -> Paragraph {
-        let text = self.input_text.to_owned() + self.cursor;
+        let text = String::from("input: ") + self.input_text.as_str() + self.cursor;
         Paragraph::new(text.clone())
             .alignment(Alignment::Left)
             .block(Block::default().title("Create new task").borders(Borders::all()))
