@@ -100,11 +100,16 @@ impl<'a> TaskManager<'a> {
     // MARK: [View] Make List
 
     pub fn make_list(&self) -> List<'a> {
-        let items: Vec<ListItem> = self.tasks.iter().map(|item| {
-            let thing: String = item.1.to_string();
-            let text = Text::from(thing);
+
+        // Sort tasks by name s.t. tasks are built "top-down"
+        let mut tasks = self.tasks.clone().into_iter().map(|t| t.1).collect::<Vec<Task>>();
+        tasks.sort_by(|t1, t2|  t1.created.cmp(&t2.created) );
+
+        // Transform Vec<Task> to something parsable by crossterm
+        let mut items: Vec<ListItem> = tasks.iter().map(|item| {
+            let text = Text::from(item.to_string());
             ListItem::new(text)
-        }).collect();
+        }).collect::<Vec<ListItem>>();
 
         List::new(items)
             .block(Block::default().title("Menu").borders(Borders::all()))
@@ -115,5 +120,4 @@ impl<'a> TaskManager<'a> {
                 )
                 .highlight_symbol(">> ")
     }
-
 }
