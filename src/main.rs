@@ -90,6 +90,8 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, view_model: Rc<RefCell<ViewMo
                 // If Enter is pressed we want to treat that as good input
                 if let KeyCode::Enter = key.code {
                     RefCell::borrow_mut(&view_model).create_task();
+                    // And reset state to menu
+                    RefCell::borrow_mut(&view_model).state = AppState::Menu;
                 }
 
                 // Otherwise, we want to forward our keypress into the InputManager
