@@ -53,17 +53,8 @@ pub struct TaskManager<'a> {
 impl<'a> TaskManager<'a> {
 
     pub fn new() -> Self {
-
-        // FIXME: Remove dummy data here
-        let mut tasks = HashMap::new();
-        // let a = Task::new("Hello", None);
-        // tasks.insert(a.uuid, a);
-        // let b = Task::new("World", None);
-        // tasks.insert(b.uuid, b);
-
-
         TaskManager {
-            tasks,
+            tasks: HashMap::new(),
             task_list: TaskList::new()
         }
     }
@@ -91,6 +82,8 @@ impl<'a> TaskManager<'a> {
             event.state = TaskState::Inactive;
         }
     }
+
+    // MARK:
 
     // MARK: [View] Make New Task
     pub fn make_newtask(&mut self) -> Block<'a> {

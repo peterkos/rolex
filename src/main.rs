@@ -89,9 +89,8 @@ fn run_app<B: Backend>(terminal: &mut Terminal<B>, view_model: Rc<RefCell<ViewMo
 
                 // If Enter is pressed we want to treat that as good input
                 if let KeyCode::Enter = key.code {
+                    // State is managed in create_task
                     RefCell::borrow_mut(&view_model).create_task();
-                    // And reset state to menu
-                    RefCell::borrow_mut(&view_model).state = AppState::Menu;
                 }
 
                 // Otherwise, we want to forward our keypress into the InputManager
@@ -188,14 +187,14 @@ fn ui<B: Backend>(f: &mut Frame<B>, view_model_ref: Rc<RefCell<ViewModel>>) {
             f.render_stateful_widget(view_model.menu_manager.make_list(), main[0], &mut view_model.menu_manager.menu_list.state);
 
         },
-        AppState::NewTask | AppState::Typing => {
-            // Task list on left half
-            // f.render_stateful_widget(view_model.task_manager.make_newtask(), main[0], &mut view_model.task_manager.task_list.state);
-
-            f.render_widget(view_model.input_manager.make_input(), main[0]);
-
-            // Now that NewTask has loaded,
-            // we want the user to automatically start typing.
+        AppState::NewTaskName | AppState::Typing => {
+            f.render_widget(view_model.input_manager.make_input_task_name(), main[0]);
+            // Setup input automatically
+            view_model.state = AppState::Typing;
+        },
+        AppState::NewTaskDesc | AppState::Typing => {
+            f.render_widget(view_model.input_manager.make_input_task_desc(), main[0]);
+            // Setup input automatically
             view_model.state = AppState::Typing;
         },
         AppState::RecordTask => {

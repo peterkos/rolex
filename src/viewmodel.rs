@@ -9,10 +9,11 @@ use crate::*;
 #[derive(PartialEq, Eq, Debug)]
 pub enum AppState {
     Menu,
-    NewTask,
     RecordTask,
     DeleteTask,
-    Typing // Special state for the event handler to ignore input
+    Typing, // Special state for the event handler to ignore input
+    NewTaskName,
+    NewTaskDesc, // FIXME: Need per-manager states...
 }
 
 pub enum ManagedListState {
@@ -42,31 +43,38 @@ impl<'a> ViewModel<'a> {
 
     pub fn list_operation(&mut self, state: ManagedListState) {
         match self.state {
-            AppState::Menu       => {
+            AppState::Menu => {
                 let selected = self.menu_manager.list_operation(state);
 
                 if let Some(selected) = selected {
                     match selected {
                         MenuItem::RecordTask => self.state = AppState::RecordTask,
-                        MenuItem::NewTask    => self.state = AppState::NewTask,
+                        MenuItem::NewTask    => self.state = AppState::NewTaskName,
                         MenuItem::DeleteTask => self.state = AppState::DeleteTask,
                     }
                 }
 
             },
-            AppState::NewTask    => todo!(),
+            AppState::NewTaskName    => todo!(),
             AppState::RecordTask => todo!(),
             AppState::DeleteTask => todo!(),
-            AppState::Typing     => todo!()
+            AppState::Typing     => todo!(),
+            AppState::NewTaskDesc => todo!()
         }
     }
 
     // MARK: Input Handling
 
     pub fn create_task(&mut self) {
-        // FIXME: Impl desc input for input stuff
         let name = self.input_manager.input_text.clone();
         self.task_manager.create_task(name.clone(), None);
+
+        // This is so the input can fake a "prompt" history
+        // with the preivous (valid) input of the user
+        self.input_manager.note_task(name.clone());
+
+        // Set app state for next phase of input
+        self.state = AppState::NewTaskDesc;
 
         // Cleanup
         self.input_manager.clear_input();
