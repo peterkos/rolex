@@ -146,7 +146,7 @@ fn ui<B: Backend>(f: &mut Frame<B>, view_model_ref: Rc<RefCell<ViewModel>>) {
 
     /*
         |-------|
-        |-------|   wrapper[0]
+        |-------|   wrapper[0] (used for debugging)
 
         |---|---|
         |   |   |   wrapper[1]
@@ -154,7 +154,7 @@ fn ui<B: Backend>(f: &mut Frame<B>, view_model_ref: Rc<RefCell<ViewModel>>) {
           ^   ^---- main[1]
           |-------- main[0]
 
-        |-------|   wrapper[2]
+        |-------|   wrapper[2] (used for user instructions)
         |-------|
 
     */
@@ -162,8 +162,8 @@ fn ui<B: Backend>(f: &mut Frame<B>, view_model_ref: Rc<RefCell<ViewModel>>) {
     // Create main wrapper around views
     let wrapper = Layout::default()
         .direction(Direction::Vertical)
-        .constraints([Constraint::Percentage(10), Constraint::Percentage(80), Constraint::Percentage(10)].as_ref())
-        .vertical_margin(6)
+        .constraints([Constraint::Percentage(20), Constraint::Percentage(60), Constraint::Percentage(20)].as_ref())
+        .vertical_margin(4)
         .horizontal_margin(30)
         .split(f.size());
 
@@ -180,6 +180,11 @@ fn ui<B: Backend>(f: &mut Frame<B>, view_model_ref: Rc<RefCell<ViewModel>>) {
 
     // FIXME: For now, always put task list on right half
     f.render_stateful_widget(view_model.task_manager.make_list(), main[1], &mut view_model.task_manager.task_list.state);
+
+    view_model.debug_text = Some(String::from("hello!"));
+
+    // Draw debug menu on top if possible
+    f.render_widget(view_model.make_debug(), wrapper[0]);
 
     match view_model.state {
         AppState::Menu => {

@@ -28,6 +28,7 @@ pub struct ViewModel<'a> {
     pub task_manager: TaskManager<'a>,
     pub input_manager: InputManager<'a>,
     pub state: AppState,
+    pub debug_text: Option<String>
 }
 
 
@@ -38,6 +39,7 @@ impl<'a> ViewModel<'a> {
             task_manager: TaskManager::new(),
             input_manager: InputManager::new(),
             state: AppState::Menu,
+            debug_text: None
         }
     }
 
@@ -108,7 +110,20 @@ impl<'a> ViewModel<'a> {
         }
     }
 
-    // MARK: Task List interface
-    // pub fn
+    /// For debug text rendering as a widget
+    /// If the `debug_text` property is not set,
+    /// nothing is rendered except the border.
+    pub fn make_debug(&self) -> Paragraph {
+
+        let mut debug_text = String::new();
+
+        if let Some(text) = self.debug_text.clone() {
+            debug_text = text;
+        }
+
+        Paragraph::new(debug_text.clone())
+            .alignment(Alignment::Left)
+            .block(Block::default().title("Debug").borders(Borders::all()))
+    }
 
 }
